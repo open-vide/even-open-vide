@@ -4,7 +4,7 @@ import { setBridgeUrl, setBridgeAuth, onStatusChange, onHostAuthUpdate, disconne
 import { HOSTS_STORAGE_KEY, ACTIVE_HOST_KEY, DEFAULT_POLL_INTERVAL } from '../lib/constants';
 import type { WebHost } from '../types';
 import { loadHosts, loadHostsSnapshot, persistHosts } from '../lib/host-storage';
-import { storageSetRaw, storageRemove } from 'even-toolkit/storage';
+import { storageSetRaw, storageRemove, storageGetRaw } from 'even-toolkit/storage';
 
 interface BridgeContextValue {
   hosts: WebHost[];
@@ -28,10 +28,18 @@ export function useBridge() {
 }
 
 export function BridgeProvider({ children }: { children: ReactNode }) {
-  const [hosts, setHosts] = useState<WebHost[]>(() => loadHostsSnapshot() as WebHost[]);
-  const [activeHostId, setActiveHostId] = useState<string | null>(
-    () => localStorage.getItem(ACTIVE_HOST_KEY) || null,
-  );
+  const [hosts, setHosts] = useState<WebHost[]>([]);
+  const [activeHostId, setActiveHostId] = useState<string | null>(null);
+
+  // Hydrate hosts + activeHostId from async storage
+  useEffect(() => {
+    loadHostsSnapshot().then((snapshot) => {
+      if (snapshot.length > 0) setHosts(snapshot as WebHost[]);
+    }).catch(() => {});
+    storageGetRaw(ACTIVE_HOST_KEY).then((val) => {
+      if (val) setActiveHostId(val);
+    }).catch(() => {});
+  }, []);
   const [hostStatuses, setHostStatuses] = useState<Record<string, 'connected' | 'disconnected'>>({});
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'connecting' | 'disconnected'>('disconnected');
 

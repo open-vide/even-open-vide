@@ -1,18 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog } from 'even-toolkit/web';
 import { GUIDE_STORAGE_KEY } from '@/lib/app-meta';
 import { UNTITLED_DIALOG_CLASS } from '@/lib/dialog';
-import { storageSetRaw } from 'even-toolkit/storage';
+import { storageSetRaw, storageGetRaw } from 'even-toolkit/storage';
 import { OpenVideGuide } from './openvide-guide';
 
 export function OpenVideGuideGate() {
-  const [open, setOpen] = useState(() => {
-    try {
-      return localStorage.getItem(GUIDE_STORAGE_KEY) !== '1';
-    } catch {
-      return true;
-    }
-  });
+  const [open, setOpen] = useState(true);
+
+  useEffect(() => {
+    storageGetRaw(GUIDE_STORAGE_KEY).then((val) => {
+      if (val === '1') setOpen(false);
+    }).catch(() => {});
+  }, []);
 
   const handleClose = () => {
     try {

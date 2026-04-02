@@ -1,7 +1,7 @@
 import type { Host as StoreHost } from '../state/types';
 import type { WebHost } from '../types';
 import { HOSTS_STORAGE_KEY } from './constants';
-import { storageSetRaw, storageRemove } from 'even-toolkit/storage';
+import { storageSetRaw, storageRemove, storageGetRaw } from 'even-toolkit/storage';
 
 type HostLike = WebHost | StoreHost;
 type HostSecrets = {
@@ -19,10 +19,9 @@ function normalizeHostUrl(url: string): string {
   return url.replace(/\/$/, '');
 }
 
-export function loadHostsSnapshot(): HostLike[] {
+function parseHostsList(raw: string | null): HostLike[] {
+  if (!raw) return [];
   try {
-    const raw = localStorage.getItem(HOSTS_STORAGE_KEY);
-    if (!raw) return [];
     const parsed = JSON.parse(raw) as Array<Partial<HostLike>>;
     return parsed
       .filter((host): host is Partial<HostLike> & Pick<HostLike, 'id' | 'name' | 'url'> => (
@@ -41,10 +40,19 @@ export function loadHostsSnapshot(): HostLike[] {
   }
 }
 
-function loadTokenMap(): { tokens: Record<string, HostSecrets>; available: boolean } {
+/** Async snapshot from SDK storage. */
+export async function loadHostsSnapshot(): Promise<HostLike[]> {
   try {
-    const raw = localStorage.getItem(HOSTS_TOKENS_STORAGE_KEY);
-    if (!raw) return { tokens: {}, available: true };
+    const raw = await storageGetRaw(HOSTS_STORAGE_KEY);
+    return parseHostsList(raw || null);
+  } catch {
+    return [];
+  }
+}
+
+function parseTokenMap(raw: string | null): { tokens: Record<string, HostSecrets>; available: boolean } {
+  if (!raw) return { tokens: {}, available: true };
+  try {
     const parsed = JSON.parse(raw) as Record<string, string | HostSecrets>;
     const normalized = Object.fromEntries(
       Object.entries(parsed).map(([hostId, value]) => [
@@ -59,8 +67,12 @@ function loadTokenMap(): { tokens: Record<string, HostSecrets>; available: boole
 }
 
 export async function loadHosts(): Promise<HostLike[]> {
-  const snapshot = loadHostsSnapshot();
-  const tokenState = loadTokenMap();
+  const [hostsRaw, tokensRaw] = await Promise.all([
+    storageGetRaw(HOSTS_STORAGE_KEY).catch(() => null),
+    storageGetRaw(HOSTS_TOKENS_STORAGE_KEY).catch(() => null),
+  ]);
+  const snapshot = parseHostsList(hostsRaw);
+  const tokenState = parseTokenMap(tokensRaw);
   const merged = snapshot.map((host) => ({
     ...host,
     token: tokenState.tokens[host.id]?.token ?? host.token,
@@ -104,12 +116,12 @@ export async function persistHosts(hosts: HostLike[]): Promise<void> {
       .filter(([, secret]) => Object.keys(secret).length > 0),
   );
 
-  storageSetRaw(HOSTS_STORAGE_KEY, JSON.stringify(safeHosts));
+  await storageSetRaw(HOSTS_STORAGE_KEY, JSON.stringify(safeHosts));
   if (Object.keys(tokens).length === 0) {
-    storageRemove(HOSTS_TOKENS_STORAGE_KEY);
+    await storageRemove(HOSTS_TOKENS_STORAGE_KEY);
     return;
   }
 
   // Store tokens as plaintext JSON — SDK storage is sandboxed per-app
-  storageSetRaw(HOSTS_TOKENS_STORAGE_KEY, JSON.stringify(tokens));
+  await storageSetRaw(HOSTS_TOKENS_STORAGE_KEY, JSON.stringify(tokens));
 }

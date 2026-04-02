@@ -36,10 +36,12 @@ export function normalizeSettings(settings?: Partial<WebSettings> | null): WebSe
   };
 }
 
-function getLocalSettingsFallback(): WebSettings {
-  return readStoredSettingsSnapshot(SETTINGS_PENDING_KEY, normalizeSettings)
-    ?? readStoredSettingsSnapshot(SETTINGS_CACHE_KEY, normalizeSettings)
-    ?? defaultSettings;
+async function getLocalSettingsFallback(): Promise<WebSettings> {
+  const pending = await readStoredSettingsSnapshot(SETTINGS_PENDING_KEY, normalizeSettings);
+  if (pending) return pending;
+  const cached = await readStoredSettingsSnapshot(SETTINGS_CACHE_KEY, normalizeSettings);
+  if (cached) return cached;
+  return defaultSettings;
 }
 
 function queueSettingsPersist(
@@ -67,7 +69,7 @@ export function useSettings() {
   const query = useQuery<WebSettings>({
     queryKey: ['settings'],
     queryFn: async () => {
-      const local = getLocalSettingsFallback();
+      const local = await getLocalSettingsFallback();
       try {
         ensureBridgeForCommand();
         const res = await rpc('settings.get');
@@ -84,7 +86,7 @@ export function useSettings() {
         ?? local;
     },
     staleTime: 30000,
-    initialData: getLocalSettingsFallback,
+    initialData: defaultSettings,
   });
 
   useEffect(() => {
@@ -116,7 +118,7 @@ export function useUpdateSetting() {
 
   return useMutation({
     mutationFn: async ({ key, value }: { key: keyof WebSettings; value: any }) => {
-      const current = normalizeSettings(queryClient.getQueryData<WebSettings>(['settings']) ?? getLocalSettingsFallback());
+      const current = normalizeSettings(queryClient.getQueryData<WebSettings>(['settings']) ?? await getLocalSettingsFallback());
       const updated = normalizeSettings({ ...current, [key]: value });
       queryClient.setQueryData(['settings'], updated);
       await writeStoredSettings(SETTINGS_CACHE_KEY, updated);

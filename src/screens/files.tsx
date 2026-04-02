@@ -8,7 +8,7 @@ import { useBridge } from '../contexts/bridge';
 import { getHostOptions, resolvePreferredHostId } from '../lib/bridge-hosts';
 import { PICKED_PATH_STORAGE_KEY } from '../hooks/use-dialog-draft';
 import { Button, Input, Select, Card, useDrawerHeader } from 'even-toolkit/web';
-import { storageSetRaw } from 'even-toolkit/storage';
+import { storageSetRaw, storageGetRaw } from 'even-toolkit/storage';
 import { IcFeatLearnExplore, IcStatusArchivedFile, IcStatusFile } from 'even-toolkit/web/icons/svg-icons';
 
 type SortMode = 'name' | 'size' | 'modified' | 'type';
@@ -38,9 +38,9 @@ function formatModified(dateStr: string): string {
   return `${Math.floor(diff / 86400000)}d`;
 }
 
-function loadSortPrefs(): { mode: SortMode; dir: SortDir } {
+async function loadSortPrefs(): Promise<{ mode: SortMode; dir: SortDir }> {
   try {
-    const raw = localStorage.getItem('openvide_file_sort');
+    const raw = await storageGetRaw('openvide_file_sort');
     if (raw) return JSON.parse(raw);
   } catch { /* ignore */ }
   return { mode: 'name', dir: 'asc' };
@@ -62,8 +62,16 @@ export function FilesRoute() {
   const [browserPath, setBrowserPath] = useState(initialPath);
   const [viewFilePath, setViewFilePath] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [sortMode, setSortMode] = useState<SortMode>(loadSortPrefs().mode);
-  const [sortDir, setSortDir] = useState<SortDir>(loadSortPrefs().dir);
+  const [sortMode, setSortMode] = useState<SortMode>('name');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
+
+  // Hydrate sort prefs from async storage
+  useEffect(() => {
+    loadSortPrefs().then(({ mode, dir }) => {
+      setSortMode(mode);
+      setSortDir(dir);
+    });
+  }, []);
   const selectedHostId = useMemo(
     () => resolvePreferredHostId(hosts, activeHostId, requestedHostId),
     [activeHostId, hosts, requestedHostId],

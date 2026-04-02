@@ -1,29 +1,40 @@
 /**
- * Client-side session labels stored in localStorage.
+ * Client-side session labels stored via SDK bridge.
  * Allows users to name sessions for easy identification.
  */
 
-import { storageSetRaw } from 'even-toolkit/storage';
+import { storageSetRaw, storageGetRaw } from 'even-toolkit/storage';
 
 const STORAGE_KEY = 'openvide_session_labels';
 
-function loadLabels(): Record<string, string> {
+/** In-memory cache — loaded async, used for sync render paths */
+let labelsCache: Record<string, string> = {};
+
+async function loadLabels(): Promise<Record<string, string>> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
+    const raw = await storageGetRaw(STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    labelsCache = parsed;
+    return parsed;
   } catch { return {}; }
 }
 
 function saveLabels(labels: Record<string, string>): void {
+  labelsCache = labels;
   storageSetRaw(STORAGE_KEY, JSON.stringify(labels));
 }
 
-export function getSessionLabel(sessionId: string): string | undefined {
-  return loadLabels()[sessionId];
+/** Initialize labels cache — call on app startup */
+export async function initLabels(): Promise<void> {
+  await loadLabels();
 }
 
-export function setSessionLabel(sessionId: string, label: string): void {
-  const labels = loadLabels();
+export function getSessionLabel(sessionId: string): string | undefined {
+  return labelsCache[sessionId];
+}
+
+export async function setSessionLabel(sessionId: string, label: string): Promise<void> {
+  const labels = await loadLabels();
   if (label.trim()) {
     labels[sessionId] = label.trim();
   } else {
@@ -32,8 +43,8 @@ export function setSessionLabel(sessionId: string, label: string): void {
   saveLabels(labels);
 }
 
-export function removeSessionLabel(sessionId: string): void {
-  const labels = loadLabels();
+export async function removeSessionLabel(sessionId: string): Promise<void> {
+  const labels = await loadLabels();
   delete labels[sessionId];
   saveLabels(labels);
 }
