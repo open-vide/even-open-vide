@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.1.5
+
+Released: 2026-04-02
+
+No breaking changes.
+
+### Changed
+
+- aligned the app with `even-toolkit` 1.6.2 for the current shared web header/layout fixes
+- GitHub releases are now part of the maintained release flow for the canonical `open-vide/even-open-vide` repository
+
+### Notes
+
+- there are no daemon or bridge protocol changes in this release
+
+
 ## 0.1.4
 
 Released: 2026-04-02
