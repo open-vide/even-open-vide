@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.7
+
+Released: 2026-04-03
+
+No breaking changes.
+
+### Changed
+
+- aligned the app with `even-toolkit` 1.6.3 for shared bridge-only storage behavior
+- host, session, and settings persistence now use the shared toolkit storage helper
+
+### Notes
+
+- there are no daemon or bridge protocol changes in this release
+
 ## 0.1.6
 
 Released: 2026-04-02
