@@ -50,11 +50,12 @@ export const homeScreen: GlassScreen<OpenVideSnapshot, OpenVideActions> = {
     ];
 
     const lines = [
-      ...compactHeader(counters),
+      line('◆  O P E N   V I D E  ◆', 'normal'),
+      line('', 'separator'),
       ...buildScrollableList({
         items: menuItems,
         highlightedIndex: nav.highlightedIndex,
-        maxVisible: 8,
+        maxVisible: 7,
         formatter: (item) => drillLabel(item.info),
       }),
     ];
