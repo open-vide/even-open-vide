@@ -1,10 +1,9 @@
 {
   "name": "open-vide-g2",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "postinstall": "sed -i '' 's/borderRdaius/borderRadius/g' node_modules/@jappyjan/even-better-sdk/dist/index.js 2>/dev/null || true",
     "dev": "vite --host 0.0.0.0 --port 5173",
     "dev:web": "vite --port 5173 --open /web.html",
     "build": "tsc && vite build",
@@ -12,11 +11,10 @@
   },
   "dependencies": {
     "@evenrealities/even_hub_sdk": "^0.0.9",
-    "@jappyjan/even-better-sdk": ">=0.0.11",
     "@tanstack/react-query": "^5.90.21",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "even-toolkit": "^1.6.5",
+    "even-toolkit": "^1.7.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router": "^7.13.1",

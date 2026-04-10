@@ -5,13 +5,13 @@
  * Usage: import { probeBridge } from './bridge-probe'; probeBridge();
  */
 
-import { EvenBetterSdk } from '@jappyjan/even-better-sdk';
+import { GlassesSdk } from 'even-toolkit/sdk-wrapper';
 
 let rawBridge: any = null;
 
 async function getRawBridge(): Promise<any> {
   if (rawBridge) return rawBridge;
-  rawBridge = await EvenBetterSdk.getRawBridge();
+  rawBridge = await GlassesSdk.getRawBridge();
   return rawBridge;
 }
 

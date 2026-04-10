@@ -12,10 +12,7 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src'),
     },
-    dedupe: ['react', 'react-dom', 'react-router', '@evenrealities/even_hub_sdk', '@jappyjan/even-better-sdk', 'upng-js', 'even-toolkit'],
-  },
-  optimizeDeps: {
-    exclude: ['even-toolkit'],
+    dedupe: ['react', 'react-dom', 'react-router', '@evenrealities/even_hub_sdk', 'upng-js', 'even-toolkit'],
   },
   server: {
     host: '0.0.0.0',

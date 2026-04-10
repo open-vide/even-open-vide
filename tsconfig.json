@@ -16,7 +16,6 @@
     "paths": {
       "@/*": ["src/*"],
       "@evenrealities/even_hub_sdk": ["./node_modules/@evenrealities/even_hub_sdk"],
-      "@jappyjan/even-better-sdk": ["./node_modules/@jappyjan/even-better-sdk"],
       "react": ["./node_modules/@types/react"],
       "react-router": ["./node_modules/react-router"]
     }

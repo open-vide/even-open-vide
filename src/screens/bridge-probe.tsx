@@ -136,11 +136,11 @@ export function BridgeProbeRoute() {
       }
     }
 
-    // Strategy 3: EvenBetterSdk
+    // Strategy 3: GlassesSdk (toolkit)
     try {
-      const { EvenBetterSdk } = await import('@jappyjan/even-better-sdk');
+      const { GlassesSdk } = await import('even-toolkit/sdk-wrapper');
       const bridge = await Promise.race([
-        EvenBetterSdk.getRawBridge(),
+        GlassesSdk.getRawBridge(),
         new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000)),
       ]) as any;
       const result = await bridge.callEvenApp(method, params);

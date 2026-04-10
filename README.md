@@ -1,5 +1,7 @@
 # open-vide-g2
 
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow?style=flat&logo=buy-me-a-coffee)](https://buymeacoffee.com/f3tch)
+
 `open-vide-g2` is the browser/webview/glasses client for OpenVide.
 
 This repo is the UI layer:
@@ -234,3 +236,9 @@ yarn build
 ```
 
 If you change shared `even-toolkit` code, rebuild and restart the dev server so the updated toolkit bundle is picked up.
+
+## Support
+
+If you find this useful, consider supporting the project:
+
+[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://buymeacoffee.com/f3tch)
